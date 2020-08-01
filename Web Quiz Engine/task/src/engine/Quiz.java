@@ -9,12 +9,12 @@ public class Quiz {
     String text;
     ArrayList<String> options;
     @JsonIgnore
-    Integer answer;
+    ArrayList<Integer> answer;
     Integer id;
 
     public Quiz() { }
 
-    public Quiz(String title, String text, ArrayList<String> options, Integer answer) {
+    public Quiz(String title, String text, ArrayList<String> options, ArrayList<Integer> answer) {
         this.title = title;
         this.text = text;
         this.options = options;
@@ -37,13 +37,13 @@ public class Quiz {
     }
     public void setOptions(ArrayList<String> options) { this.options = options; }
 
-    public Integer getAnswer() { return answer; }
-    public void setAnswer(Integer answer) { this.answer = answer; }
+    public ArrayList<Integer> getAnswer() { return answer; }
+    public void setAnswer(ArrayList<Integer> answer) { this.answer = answer; }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     // cheking if passed integer is correct answer
-    boolean isCorrect(Integer index) {
-        return index == this.answer;
+    boolean isCorrect(ArrayList<Integer> index) {
+        return index.equals(this.answer);
     }
 }

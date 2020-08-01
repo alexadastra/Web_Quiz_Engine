@@ -13,11 +13,11 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 @RestController
 class QuizApi {
     ArrayList<Quiz> quizArray;
-    Answer correctAnswer, wrongAnswer;
+    final Result correctResult, wrongResult;
     QuizApi() {
         quizArray = new ArrayList<Quiz>();
-        correctAnswer = new RightAnswer("Congratulations, you're right!");
-        wrongAnswer = new WrongAnswer("Wrong answer! Please, try again.");
+        correctResult = new RightResult("Congratulations, you're right!");
+        wrongResult = new WrongResult("Wrong answer! Please, try again.");
     }
     // just a bit of courtecy for the engine
     @GetMapping(path = "/api/hello_api")
@@ -33,11 +33,7 @@ class QuizApi {
 
     @GetMapping(path = "/api/quizzes/{id}")
     public Quiz getQuiz(@PathVariable Integer id) {
-        try {
-            return quizArray.get(id - 1);
-        } catch (IndexOutOfBoundsException err) {
-            throw new ResponseStatusException(NOT_FOUND, "Unable to find resource");
-        }
+        return quizArray.get(id - 1);
     }
 
     @GetMapping(path = "/api/quizzes")
@@ -45,16 +41,33 @@ class QuizApi {
         return quizArray;
     }
 
-    @PostMapping(path = "api/quizzes/{id}/solve/answer={answ}")
-    public Answer checkAnswer(@PathVariable Integer id, Integer answ) {
-        return quizArray.get(id).isCorrect(answ) ? correctAnswer : wrongAnswer;
+    // @PostMapping(path = "api/quizzes/{id}/solve/answer={answ}")
+    // public Answer checkAnswer(@PathVariable Integer id, Integer answ) {
+    //     return quizArray.get(id).isCorrect(answ) ? correctAnswer : wrongAnswer;
+    // }
+
+    @PostMapping(path = "api/quizzes/{id}/solvewithstring")
+    public Result checkAnswerWithString(@PathVariable Integer id, @RequestBody String answ) {
+        final Quiz quiz = getQuiz(id);
+        answ = answ.substring("answer: [".length());
+        ArrayList<Integer> answer = new ArrayList<Integer>();
+        while (true) {
+            if (answ.equals("]")){
+                break;
+            } else{
+                answer.add(Integer.parseInt(answ));
+            }
+            if (answ.startsWith(",")){
+                answ = answ.substring(1);
+            }
+        }
+        return quiz.isCorrect(answer) ? correctResult : wrongResult;
     }
 
     @PostMapping(path = "api/quizzes/{id}/solve")
-    public Answer checkAnswer(@PathVariable Integer id, @RequestBody String answ) {
-        Quiz quiz = getQuiz(id);
-        Integer answer = Integer.parseInt(answ.substring("answer=".length()));
-        return quiz.isCorrect(answer) ? correctAnswer : wrongAnswer;
+    public Result checkAnswer(@PathVariable Integer id, @RequestBody Answer answ) {
+        final Quiz quiz = getQuiz(id);
+        return quiz.isCorrect(answ.getAnswer()) ? correctResult : wrongResult;
     }
 }
 
