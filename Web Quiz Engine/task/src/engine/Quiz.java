@@ -1,6 +1,7 @@
 package engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 
@@ -8,7 +9,9 @@ public class Quiz {
     String title;
     String text;
     ArrayList<String> options;
-    @JsonIgnore
+    //@JsonIgnore
+    @JsonProperty( value = "answer", access = JsonProperty.Access.WRITE_ONLY)
+    // @SerializedName("answer")
     ArrayList<Integer> answer;
     Integer id;
 
@@ -30,7 +33,7 @@ public class Quiz {
     public String getText() {
         return text;
     }
-    public void setText(String Text) { this.text = text; }
+    public void setText(String text) { this.text = text; }
 
     public ArrayList<String> getOptions() {
         return options;
