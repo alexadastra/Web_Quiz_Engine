@@ -11,7 +11,7 @@ public class Result{
         this.feedback = feedback;
     }
 
-    //standart setters and getters
+    //standard setters and getters
     public boolean getSuccess() {
         return success;
     }

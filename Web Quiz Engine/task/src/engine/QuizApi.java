@@ -1,75 +1,71 @@
 package engine;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
+@RequestMapping("/api")
 public class QuizApi {
-    ArrayList<Quiz> quizArray;
+    final QuizRepository quizRepository;
     final Result correctResult, wrongResult;
-    QuizApi() {
-        quizArray = new ArrayList<Quiz>();
+
+    QuizApi(QuizRepository quizRepository){
         correctResult = new RightResult("Congratulations, you're right!");
         wrongResult = new WrongResult("Wrong answer! Please, try again.");
+        this.quizRepository = quizRepository;
     }
-    // just a bit of courtecy for the engine
-    @GetMapping(path = "/api/hello_api")
+
+    // just a bit of courtesy for the engine
+    @GetMapping(path = "/hello_api")
     public String hello () {
         return "hello, user!";
     }
 
-    @PostMapping(path = "api/quizzes")
-    public void createQuiz(@RequestBody Quiz newQuiz) {
-        newQuiz.setId(quizArray.size() + 1);
-        quizArray.add(newQuiz);
+    @PostMapping(path = "/quizzes")
+    public Quiz createQuiz(@RequestBody Quiz newQuiz) {
+        newQuiz.setId(quizRepository.count() + 1);
+        return quizRepository.save(newQuiz);
     }
 
-    @GetMapping(path = "/api/quizzes/{id}")
-    public Quiz getQuiz(@PathVariable Integer id) {
-        return quizArray.get(id - 1);
+    @GetMapping(path = "/quizzes/{id}")
+    public ResponseEntity<Quiz> getQuiz(@PathVariable Integer id) throws ResourceNotFoundException {
+        Quiz quiz = quizRepository.findById(id - 1)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+        return ResponseEntity.ok().body(quiz);
     }
 
-    @GetMapping(path = "/api/quizzes")
-    public ArrayList<Quiz> getAllQuizzes() {
-        return quizArray;
+    @GetMapping(path = "/quizzes")
+    public List<Quiz> getAllQuizzes() {
+        List<Quiz> quizzes = new ArrayList<>();
+        quizRepository.findAll().forEach(quizzes::add);
+        return quizzes;
     }
 
-    // @PostMapping(path = "api/quizzes/{id}/solve/answer={answ}")
-    // public Answer checkAnswer(@PathVariable Integer id, Integer answ) {
-    //     return quizArray.get(id).isCorrect(answ) ? correctAnswer : wrongAnswer;
-    // }
-
-    @PostMapping(path = "api/quizzes/{id}/solvewithstring")
-    public Result checkAnswerWithString(@PathVariable Integer id, @RequestBody String answ) {
-        final Quiz quiz = getQuiz(id);
-        answ = answ.substring("answer: [".length());
-        ArrayList<Integer> answer = new ArrayList<Integer>();
-        while (true) {
-            if (answ.equals("]")){
-                break;
-            } else{
-                answer.add(Integer.parseInt(answ));
-            }
-            if (answ.startsWith(",")){
-                answ = answ.substring(1);
-            }
-        }
-        return quiz.isCorrect(answer) ? correctResult : wrongResult;
+    @PostMapping(path = "/quizzes/{id}/solve", params = "answer")
+    public Result checkAnswerWithString(@PathVariable Integer id, @RequestParam ArrayList<Integer> answer) throws ResourceNotFoundException {
+        Quiz quiz = getQuiz(id).getBody();
+        return quiz.isCorrect(new ArrayList<Integer>(answer)) ? correctResult : wrongResult;
     }
 
-    @PostMapping(path = "api/quizzes/{id}/solve")
-    public Result checkAnswer(@PathVariable Integer id, @RequestBody Answer answ) {
-        final Quiz quiz = getQuiz(id);
-        return quiz.isCorrect(answ.getAnswer()) ? correctResult : wrongResult;
+    @PostMapping(path = "/quizzes/{id}/solve", consumes = "application/json")
+    public Result checkAnswer(@PathVariable Integer id, @RequestBody Answer answer) throws ResourceNotFoundException {
+        final Quiz quiz = getQuiz(id).getBody();
+        return quiz.isCorrect(answer.getAnswer()) ? correctResult : wrongResult;
     }
 }
 
 /*
-        ArrayList<String> array = new ArrayList<String>();
-        array.add("Robot");
-        array.add("Tea leaf");
-        array.add("Cup of coffee");
-        array.add("Bug");
-        currentQuiz = new Quiz("The Java Logo",
-                "What is depicted on the Java logo?", array, 2);
+{
+  "title": "Coffee drinks",
+  "text": "Select only coffee drinks.",
+  "options": ["Americano","Tea","Cappuccino","Sprite"],
+  "answer": [0,2]
+}
+
+{
+  "answer": [0, 2]
+}
  */
