@@ -2,7 +2,6 @@ package engine;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jdk.jshell.spi.ExecutionControl;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -29,10 +28,7 @@ public class Quiz {
 
     public Quiz() { }
 
-    public Quiz(String title, String text, ArrayList<String> options, ArrayList<Integer> answer) throws ExecutionControl.NotImplementedException {
-        if (options == null) {
-            throw new ExecutionControl.NotImplementedException("null options!");
-        }
+    public Quiz(String title, String text, ArrayList<String> options, ArrayList<Integer> answer) {
         this.title = title;
         this.text = text;
         this.options = options;
