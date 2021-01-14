@@ -1,5 +1,8 @@
 package engine.quiz;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -8,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class QuizDBService implements QuizService{
+public class QuizDBService {
     final
     QuizRepository quizRepository_;
     private static final String NOT_FOUND_MESSAGE = "No such quiz";
@@ -30,9 +33,27 @@ public class QuizDBService implements QuizService{
         }
     }
 
-    public List<Quiz> getAll() {
-        return new ArrayList<>(quizRepository_.findAll());
+    //public List<Quiz> getAll() {
+      //   return new ArrayList<>(quizRepository_.findAll());
+    //}
+
+    public Page<Quiz> getAll(Pageable paging) {
+        return quizRepository_.findAll(paging);
     }
+   /*
+    public List<Quiz> getAll(Integer pageNo)
+    {
+        Pageable paging = PageRequest.of(pageNo, 10);
+
+        Page<Quiz> pagedResult = quizRepository_.findAll(paging);
+
+        if(pagedResult.hasContent()) {
+            return pagedResult.getContent();
+        } else {
+            return new ArrayList<Quiz>();
+        }
+    }
+    */
 
     public Integer size() {
         return (int) quizRepository_.count();

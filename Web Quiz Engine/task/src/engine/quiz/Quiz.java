@@ -26,7 +26,6 @@ public class Quiz implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private User user;
 
-
     @NotBlank(message = "Field 'title' cannot be blank!")
     private String title;
 
